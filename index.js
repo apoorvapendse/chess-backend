@@ -1,9 +1,31 @@
 import express from "express";
 import router from "./Router/router.js";
+import {createServer} from 'node:http'; 
+import {Server} from 'socket.io'
+
+
+// Block for some notes, collapse if not needed
+{
+ // in normal client-server http requests, server can only communicate with client iff client sends some request to the server
+//web socket connection doesn't close like http and communication is bidirectional(full duplex)
+
+}
+
+
 
 const app = express();
-const PORT = 3000;
+// server will handle all the http requests
+const server = createServer(app);
+//io will handle all the socket connections
+const io = new Server(server,{cors:{origin:"http://localhost:3000"}});
+
+const PORT = 4000;
 
 app.use("/", router);
 
-app.listen(PORT, () => console.log(`server is up at ${PORT}`));
+io.on("connection",(socket)=>{
+    console.log("new user connected:",socket.id);
+    socket.emit("greeting",{message:"whats up client???"})
+})
+
+server.listen(PORT, () => console.log(`server is up at ${PORT}`));
