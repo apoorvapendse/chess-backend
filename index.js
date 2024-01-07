@@ -6,7 +6,8 @@ import {Server} from 'socket.io'
 
 // Block for some notes, collapse if not needed
 {
- // in normal client-server http requests, server can only communicate with client iff client sends some request to the server
+ // in normal client-server http requests, 
+// server can only communicate with client iff client sends some request to the server
 //web socket connection doesn't close like http and communication is bidirectional(full duplex)
 
 }
