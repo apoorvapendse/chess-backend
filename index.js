@@ -2,6 +2,7 @@ import express from "express";
 import router from "./Router/router.js";
 import {createServer} from 'node:http'; 
 import {Server} from 'socket.io'
+import { v4 as uuidv4 } from 'uuid';
 
 
 // Block for some notes, collapse if not needed
@@ -26,7 +27,24 @@ app.use("/", router);
 
 io.on("connection",(socket)=>{
     console.log("new user connected:",socket.id);
-    socket.emit("greeting",{message:"whats up client???"})
+        
+        socket.on("create-game",()=>{
+        //    join room and then let the creator socket know 
+        //    about successful joining by emitting the id in the room;
+            const roomID = uuidv4();
+            console.log("new room id:",roomID);
+            socket.join(roomID)
+            io.to(roomID).emit("create-success",roomID)
+        })
+        socket.on('join-game',(roomID)=>{
+
+            socket.join(roomID);
+
+            console.log(`${socket.id} joined room:${roomID}`);
+            io.to(roomID).emit("join-success")
+        })
+
 })
+
 
 server.listen(PORT, () => console.log(`server is up at ${PORT}`));
