@@ -32,8 +32,8 @@ io.on("connection",(socket)=>{
         //    join room and then let the creator socket know 
         //    about successful joining by emitting the id in the room;
         console.log(data.playerEmail)
-            const roomID = uuidv4();
-            console.log("new room id:",roomID);
+            //joining room having name as the player's email
+            const roomID = data.playerEmail
             socket.join(roomID)
             io.to(roomID).emit("create-success",roomID)
         })
