@@ -28,19 +28,20 @@ app.use("/", router);
 io.on("connection",(socket)=>{
     console.log("new user connected:",socket.id);
         
-        socket.on("create-game",()=>{
+        socket.on("create-game",(data)=>{
         //    join room and then let the creator socket know 
         //    about successful joining by emitting the id in the room;
+        console.log(data.playerEmail)
             const roomID = uuidv4();
             console.log("new room id:",roomID);
             socket.join(roomID)
             io.to(roomID).emit("create-success",roomID)
         })
-        socket.on('join-game',(roomID)=>{
+        socket.on('join-game',(data)=>{
 
+            let roomID = data?.inputRoomID
             socket.join(roomID);
-
-            console.log(`${socket.id} joined room:${roomID}`);
+            console.log(`${data.playerEmail} joined room:${roomID}`);
             io.to(roomID).emit("join-success")
         })
 
