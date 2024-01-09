@@ -20,6 +20,8 @@ const PORT = 4000;
 
 app.use("/", router);
 
+let hostColor = null;
+
 io.on("connection", (socket) => {
   console.log("new user connected:", socket.id);
 
@@ -29,19 +31,34 @@ io.on("connection", (socket) => {
     console.log(data.playerEmail);
     // joining room having name as the player's email
     const roomID = data.playerEmail;
+    console.log("lolfuck", roomID);
     socket.join(roomID);
     io.to(roomID).emit("create-success", roomID);
   });
 
-  socket.on("join-game", (data) => {
-    let roomID = data?.inputRoomID;
-    socket.join(roomID);
-    console.log(`${data.playerEmail} joined room:${roomID}`);
-    io.to(roomID).emit("join-success");
+  socket.on("host-piece-color", (hostPieceColor) => {
+    hostColor = hostPieceColor;
+    console.log("recieve-host-color", hostColor);
   });
 
-  socket.on("host-piece-color", (hostColor) => {
+  socket.on("join-game", (data) => {
+    let roomID = data?.inputRoomID;
     console.log(hostColor);
+    if (hostColor) {
+      socket.join(roomID);
+      console.log(`${data.playerEmail} joined room:${roomID}`);
+      // sending host-color to caller
+      socket.emit("recieve-host-color", hostColor);
+      // sending join-success to host
+      io.to(roomID).emit("join-success");
+    } else {
+      io.to(roomID).emit("host-piece-color-unselected");
+    }
+  });
+
+  socket.on("update-board", (boardState) => {
+    console.log(boardState);
+    // todo: save boardstate to redis or db
   });
 });
 
