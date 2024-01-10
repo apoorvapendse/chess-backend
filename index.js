@@ -21,6 +21,7 @@ const PORT = 4000;
 app.use("/", router);
 
 let hostColor = null;
+let hostMail = null;
 
 io.on("connection", (socket) => {
   console.log("new user connected:", socket.id);
@@ -31,7 +32,6 @@ io.on("connection", (socket) => {
     console.log(data.playerEmail);
     // joining room having name as the player's email
     const roomID = data.playerEmail;
-    console.log("lolfuck", roomID);
     socket.join(roomID);
     io.to(roomID).emit("create-success", roomID);
   });
@@ -43,7 +43,7 @@ io.on("connection", (socket) => {
 
   socket.on("join-game", (data) => {
     let roomID = data?.inputRoomID;
-    console.log(hostColor);
+    hostMail = roomID;
     if (hostColor) {
       socket.join(roomID);
       console.log(`${data.playerEmail} joined room:${roomID}`);
@@ -57,8 +57,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("update-board", (boardState) => {
-    console.log(boardState);
     // todo: save boardstate to redis or db
+
+    // io.to(hostMail).emit("recieve-updated-board", boardState);
+    socket.broadcast.to(hostMail).emit("recieve-updated-board", boardState);
   });
 });
 
