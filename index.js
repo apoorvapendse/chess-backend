@@ -2,6 +2,7 @@ import express from "express";
 import router from "./Router/router.js";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import { createClient } from "redis";
 
 // Block for some notes, collapse if not needed
 {
@@ -15,6 +16,11 @@ const app = express();
 const server = createServer(app);
 //io will handle all the socket connections
 const io = new Server(server, { cors: { origin: "http://localhost:3000" } });
+
+// creating redis client
+const redis = createClient();
+redis.on("error", (err) => console.log("redis client error", err));
+redis.connect();
 
 const PORT = 4000;
 
