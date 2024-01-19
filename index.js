@@ -60,6 +60,7 @@ io.on("connection", (socket) => {
     // todo: save boardstate to redis or db
 
     // io.to(hostMail).emit("recieve-updated-board", boardState);
+    // hostMail is the roomID;
     socket.broadcast.to(hostMail).emit("recieve-updated-board", boardState);
   });
 });
