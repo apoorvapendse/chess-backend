@@ -38,6 +38,10 @@ export async function setHostColor(innerHashID, color) {
   await redis.hset(`GlobalHashMap:${innerHashID}`, `hostColor`, `${color}`);
 }
 
+export async function getHostColor(innerHashID) {
+  return await redis.hget(`GlobalHashMap:${innerHashID}`, `hostColor`);
+}
+
 export async function setSecondPlayer(innerHashID, email2) {
   await redis.hset(`GlobalHashMap:${innerHashID}`, `player2Email`, `${email2}`);
 }
@@ -49,7 +53,7 @@ export async function updateBoardState(innerHashID, boardState) {
       "boardState",
       JSON.stringify(boardState)
     );
-    console.log(`Board state updated successfully for ${innerHashID}`);
+    console.log(`Board state stored in redis for ${innerHashID}`);
   } catch (error) {
     console.error(`Error updating board state for ${innerHashID}:`, error);
   }
