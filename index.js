@@ -2,6 +2,7 @@ import express from "express";
 import router from "./Router/router.js";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import { createGameInRedis, setHostColor } from "./redis/redisFuncs.js";
 
 // Block for some notes, collapse if not needed
 {
@@ -26,18 +27,22 @@ let hostMail = null;
 io.on("connection", (socket) => {
   console.log("new user connected:", socket.id);
 
-  socket.on("create-game", ({ playerEmail, uuid }) => {
+  socket.on("create-game", async ({ playerEmail, uuid }) => {
     // join room and then let the creator socket know
     // about successful joining by emitting the id in the room;
     // rooms are created with host's uuid
     const roomID = uuid;
     socket.join(roomID);
     io.to(roomID).emit("create-success", roomID);
+    // creating game in redis
+    await createGameInRedis(uuid, playerEmail);
     console.log(playerEmail + "created room with id" + uuid);
   });
 
-  socket.on("host-piece-color", (hostPieceColor) => {
+  socket.on("host-piece-color", async ({ hostPieceColor, uuid }) => {
     hostColor = hostPieceColor;
+    // storing hostColor in redis
+    await setHostColor(uuid, hostPieceColor);
     console.log("recieve-host-color", hostColor);
   });
 
