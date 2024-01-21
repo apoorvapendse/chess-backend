@@ -37,6 +37,7 @@ io.on("connection", (socket) => {
     // about successful joining by emitting the id in the room;
     console.log(data.playerEmail);
     // joining room having name as the player's email
+    // check whether the room already exists
     const roomID = data.playerEmail;
     socket.join(roomID);
     io.to(roomID).emit("create-success", roomID);
