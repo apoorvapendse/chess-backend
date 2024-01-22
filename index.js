@@ -30,20 +30,26 @@ app.use("/", router);
 io.on("connection", (socket) => {
   console.log("new user connected:", socket.id);
 
-  socket.on("create-game", async ({ playerEmail, roomID }) => {
+  socket.on("create-game", async ({ playerEmail, newRoomID }) => {
     // join room and then let the creator socket know
     // about successful joining by emitting the id in the room;
     // rooms are created with host's roomID
-    socket.join(roomID);
-    io.to(roomID).emit("create-success", roomID);
+    socket.join(newRoomID);
+    io.to(newRoomID).emit("create-success", newRoomID);
 
     // creating game in redis
-    await createGameInRedis(roomID, playerEmail);
-    console.log(playerEmail + "created room with id" + roomID);
+    await createGameInRedis(newRoomID, playerEmail);
+    console.log(playerEmail + " created room with id: " + newRoomID);
   });
 
   socket.on("host-piece-color", async ({ hostPieceColor, roomID }) => {
     // storing hostColor in redis
+    console.log(
+      "host set his piece color to:",
+      hostPieceColor,
+      "for room:",
+      roomID
+    );
     await setHostColor(roomID, hostPieceColor);
     console.log("recieve-host-color", hostPieceColor);
   });
@@ -69,11 +75,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("update-board", ({ boardState, hostID }) => {
+  socket.on("update-board", ({ boardState, roomID }) => {
     // saving boardstate to redis or db
-    updateBoardState(hostID, boardState);
+    updateBoardState(roomID, boardState);
 
-    socket.broadcast.to(hostID).emit("recieve-updated-board", boardState);
+    socket.broadcast.to(roomID).emit("recieve-updated-board", boardState);
   });
 });
 
