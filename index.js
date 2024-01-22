@@ -81,6 +81,13 @@ io.on("connection", (socket) => {
 
     socket.broadcast.to(roomID).emit("recieve-updated-board", boardState);
   });
+
+  // client disconnect
+  socket.on("disconnect", () => {
+    // TODO: Map socket id with email in redis for both players
+    console.log(socket.id + " got disconnected");
+  });
+  // Todo: make event handler for reconnecting when the user clicks on the rejoin button from client side
 });
 
 server.listen(PORT, () => console.log(`server is up at ${PORT}`));
