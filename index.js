@@ -36,7 +36,7 @@ io.on("connection", (socket) => {
     // rooms are created with host's uuid
     socket.join(uuid);
     io.to(uuid).emit("create-success", uuid);
-    
+
     // creating game in redis
     await createGameInRedis(uuid, playerEmail);
     console.log(playerEmail + "created room with id" + uuid);

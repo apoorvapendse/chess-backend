@@ -26,6 +26,8 @@ export async function createGameInRedis(hostUid, hostEmail) {
       ``,
       "boardState",
       ``,
+      `isActive`,
+      ``,
       `hostColor`,
       ``
     );
@@ -85,4 +87,4 @@ async function testFunctions() {
   console.log(JSON.parse(boardState));
 }
 
-// testFunctions();
+testFunctions();
