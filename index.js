@@ -39,7 +39,7 @@ io.on("connection", (socket) => {
 
     // creating game in redis
     await createGameInRedis(roomID, playerEmail);
-    console.log(playerEmail + "created room with id" + uuid);
+    console.log(playerEmail + "created room with id" + roomID);
   });
 
   socket.on("host-piece-color", async ({ hostPieceColor, roomID }) => {
