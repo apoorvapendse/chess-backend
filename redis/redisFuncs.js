@@ -13,15 +13,26 @@ export async function createGlobalHashmap() {
     "boardState",
     "your_board_state1"
   );
+export async function createGlobalHashmap() {
+  //create a dummy entry in the global hashmap
+  redis.hset(
+    `GlobalHashMap:Hashmap1`,
+    "player1Email",
+    "example1@email.com",
+    "player2Email",
+    "another1@example.com",
+    "boardState",
+    "your_board_state1"
+  );
 }
 
-export async function addGameInRedis(email1) {
+export async function createGameInRedis(hostUid, hostEmail) {
   // TODO: set expiry time for created game
-  if ((await redis.hget(`GlobalHashMap:${email1}`, `player1Email`)) === null) {
+  if ((await redis.hget(`GlobalHashMap:${hostUid}`, `player1Email`)) === null) {
     await redis.hset(
-      `GlobalHashMap:${email1}`,
+      `GlobalHashMap:${hostUid}`,
       "player1Email",
-      `${email1}`,
+      `${hostEmail}`,
       "player2Email",
       ``,
       "boardState",
@@ -40,6 +51,10 @@ export async function setHostColor(innerHashID, color) {
   await redis.hset(`GlobalHashMap:${innerHashID}`, `hostColor`, `${color}`);
 }
 
+export async function getHostColor(innerHashID) {
+  return await redis.hget(`GlobalHashMap:${innerHashID}`, `hostColor`);
+}
+
 export async function setSecondPlayer(innerHashID, email2) {
   await redis.hset(`GlobalHashMap:${innerHashID}`, `player2Email`, `${email2}`);
 }
@@ -51,20 +66,20 @@ export async function updateBoardState(innerHashID, boardState) {
       "boardState",
       JSON.stringify(boardState)
     );
-    console.log(`Board state updated successfully for ${innerHashID}`);
+    console.log(`Board state stored in redis for ${innerHashID}`);
   } catch (error) {
     console.error(`Error updating board state for ${innerHashID}:`, error);
   }
 }
 
-createGlobalHashmap();
+// createGlobalHashmap();
 
 // Testing the functions
 async function testFunctions() {
-  await addGameInRedis("apoorvavpendse@gmail.com");
+  await createGameInRedis("apoorvavpendse@gmail.com");
 
   console.log("setting host color");
-  await setHostColor("apoorvavpendse@gmail.com", "white");
+  await setHostColor("apoorvavpendse@gmail.com", "black");
 
   console.log("setting player2 email");
   await setSecondPlayer("apoorvavpendse@gmail.com", "ganesh@gmail.com");

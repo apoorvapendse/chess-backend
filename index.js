@@ -2,7 +2,13 @@ import express from "express";
 import router from "./Router/router.js";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import { createClient } from "redis";
+import {
+  createGameInRedis,
+  getHostColor,
+  setHostColor,
+  setSecondPlayer,
+  updateBoardState,
+} from "./redis/redisFuncs.js";
 
 // Block for some notes, collapse if not needed
 {
@@ -17,45 +23,45 @@ const server = createServer(app);
 //io will handle all the socket connections
 const io = new Server(server, { cors: { origin: "http://localhost:3000" } });
 
-// creating redis client
-const redis = createClient();
-redis.on("error", (err) => console.log("redis client error", err));
-redis.connect();
-
 const PORT = 4000;
 
 app.use("/", router);
 
-let hostColor = null;
-let hostMail = null;
-
 io.on("connection", (socket) => {
   console.log("new user connected:", socket.id);
 
-  socket.on("create-game", (data) => {
+  socket.on("create-game", async ({ playerEmail, uuid }) => {
     // join room and then let the creator socket know
     // about successful joining by emitting the id in the room;
-    console.log(data.playerEmail);
-    // joining room having name as the player's email
-    // check whether the room already exists
-    const roomID = data.playerEmail;
-    socket.join(roomID);
-    io.to(roomID).emit("create-success", roomID);
+    // rooms are created with host's uuid
+    socket.join(uuid);
+    io.to(uuid).emit("create-success", uuid);
+
+    // creating game in redis
+    await createGameInRedis(uuid, playerEmail);
+    console.log(playerEmail + "created room with id" + uuid);
   });
 
-  socket.on("host-piece-color", (hostPieceColor) => {
-    hostColor = hostPieceColor;
-    console.log("recieve-host-color", hostColor);
+  socket.on("host-piece-color", async ({ hostPieceColor, uuid }) => {
+    // storing hostColor in redis
+    await setHostColor(uuid, hostPieceColor);
+    console.log("recieve-host-color", hostPieceColor);
   });
 
-  socket.on("join-game", (data) => {
-    let roomID = data?.inputRoomID;
-    hostMail = roomID;
+  socket.on("join-game", async ({ playerEmail, inputRoomID }) => {
+    let roomID = inputRoomID;
+    const hostColor = await getHostColor(inputRoomID);
+
     if (hostColor) {
       socket.join(roomID);
-      console.log(`${data.playerEmail} joined room:${roomID}`);
+      console.log(`${playerEmail} joined room:${roomID}`);
+
+      // adding second player to redis
+      setSecondPlayer(inputRoomID, playerEmail);
+
       // sending host-color to caller
       socket.emit("recieve-host-color", hostColor);
+
       // sending join-success to host
       io.to(roomID).emit("join-success");
     } else {
@@ -63,12 +69,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("update-board", (boardState) => {
-    // todo: save boardstate to redis or db
+  socket.on("update-board", ({ boardState, hostID }) => {
+    // saving boardstate to redis or db
+    updateBoardState(hostID, boardState);
 
-    // io.to(hostMail).emit("recieve-updated-board", boardState);
-    // hostMail is the roomID;
-    socket.broadcast.to(hostMail).emit("recieve-updated-board", boardState);
+    socket.broadcast.to(hostID).emit("recieve-updated-board", boardState);
   });
 });
 
