@@ -87,4 +87,4 @@ async function testFunctions() {
   console.log(JSON.parse(boardState));
 }
 
-testFunctions();
+// testFunctions();
