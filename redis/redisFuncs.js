@@ -13,17 +13,6 @@ export async function createGlobalHashmap() {
     "boardState",
     "your_board_state1"
   );
-export async function createGlobalHashmap() {
-  //create a dummy entry in the global hashmap
-  redis.hset(
-    `GlobalHashMap:Hashmap1`,
-    "player1Email",
-    "example1@email.com",
-    "player2Email",
-    "another1@example.com",
-    "boardState",
-    "your_board_state1"
-  );
 }
 
 export async function createGameInRedis(hostUid, hostEmail) {
