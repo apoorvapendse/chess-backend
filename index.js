@@ -30,7 +30,7 @@ app.use("/", router);
 io.on("connection", (socket) => {
   console.log("new user connected:", socket.id);
 
-  socket.on("create-game", async ({ playerEmail, newRoomID }) => {
+  socket.on("create-game", async ({ firebaseID, newRoomID, playerEmail }) => {
     // join room and then let the creator socket know
     // about successful joining by emitting the id in the room;
     // rooms are created with host's roomID
@@ -38,7 +38,7 @@ io.on("connection", (socket) => {
     io.to(newRoomID).emit("create-success", newRoomID);
 
     // creating game in redis
-    await createGameInRedis(newRoomID, playerEmail);
+    await createGameInRedis(newRoomID, firebaseID);
     console.log(playerEmail + " created room with id: " + newRoomID);
   });
 
@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
     console.log("recieve-host-color", hostPieceColor);
   });
 
-  socket.on("join-game", async ({ playerEmail, inputRoomID }) => {
+  socket.on("join-game", async ({ firebaseID, playerEmail, inputRoomID }) => {
     let roomID = inputRoomID;
     const hostColor = await getHostColor(inputRoomID);
 
@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
       console.log(`${playerEmail} joined room:${roomID}`);
 
       // adding second player to redis
-      setSecondPlayer(inputRoomID, playerEmail);
+      setSecondPlayer(inputRoomID, firebaseID);
 
       // sending host-color to caller
       socket.emit("recieve-host-color", hostColor);
@@ -82,11 +82,6 @@ io.on("connection", (socket) => {
     socket.broadcast.to(roomID).emit("recieve-updated-board", boardState);
   });
 
-  // client disconnect
-  socket.on("disconnect", () => {
-    // TODO: Map socket id with email in redis for both players
-    console.log(socket.id + " got disconnected");
-  });
   // Todo: make event handler for reconnecting when the user clicks on the rejoin button from client side
 });
 

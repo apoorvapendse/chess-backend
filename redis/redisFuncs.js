@@ -2,27 +2,14 @@ import Redis from "ioredis";
 
 const redis = new Redis();
 
-export async function createGlobalHashmap() {
-  //create a dummy entry in the global hashmap
-  redis.hset(
-    `GlobalHashMap:Hashmap1`,
-    "player1Email",
-    "example1@email.com",
-    "player2Email",
-    "another1@example.com",
-    "boardState",
-    "your_board_state1"
-  );
-}
-
 export async function createGameInRedis(hostUid, hostEmail) {
   // TODO: set expiry time for created game
   if ((await redis.hget(`GlobalHashMap:${hostUid}`, `player1Email`)) === null) {
     await redis.hset(
       `GlobalHashMap:${hostUid}`,
-      "player1Email",
+      "player1FbId",
       `${hostEmail}`,
-      "player2Email",
+      "player2FbId",
       ``,
       "boardState",
       ``,
@@ -44,8 +31,20 @@ export async function getHostColor(innerHashID) {
   return await redis.hget(`GlobalHashMap:${innerHashID}`, `hostColor`);
 }
 
-export async function setSecondPlayer(innerHashID, email2) {
-  await redis.hset(`GlobalHashMap:${innerHashID}`, `player2Email`, `${email2}`);
+export async function setSecondPlayer(innerHashID, firebaseID) {
+  await redis.hset(
+    `GlobalHashMap:${innerHashID}`,
+    `player2FbId`,
+    `${firebaseID}`
+  );
+}
+
+export async function setCurrentPlayerColor(currentPlayerColor) {
+  await redis.hset(
+    `GlobalHashMap:${innerHashID}`,
+    `currentPlayerColor`,
+    `${currentPlayerColor}`
+  );
 }
 
 export async function updateBoardState(innerHashID, boardState) {
@@ -61,7 +60,9 @@ export async function updateBoardState(innerHashID, boardState) {
   }
 }
 
-// createGlobalHashmap();
+export async function addToFirebaseToRoomMap(firebaseID, roomID) {
+  await redis.hset(`FirebaseToRoomMap:${firebaseID}`, roomID);
+}
 
 // Testing the functions
 async function testFunctions() {
@@ -86,5 +87,3 @@ async function testFunctions() {
   );
   console.log(JSON.parse(boardState));
 }
-
-// testFunctions();
