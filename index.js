@@ -3,8 +3,12 @@ import router from "./Router/router.js";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import {
+  addToFirebaseToRoomMap,
   createGameInRedis,
+  getBoardState,
+  getCurrentPlayerColor,
   getHostColor,
+  redisRejoinHandler,
   setHostColor,
   setSecondPlayer,
   updateBoardState,
@@ -39,6 +43,7 @@ io.on("connection", (socket) => {
 
     // creating game in redis
     await createGameInRedis(newRoomID, firebaseID);
+    await addToFirebaseToRoomMap(firebaseID,newRoomID);
     console.log(playerEmail + " created room with id: " + newRoomID);
   });
 
@@ -63,8 +68,8 @@ io.on("connection", (socket) => {
       console.log(`${playerEmail} joined room:${roomID}`);
 
       // adding second player to redis
-      setSecondPlayer(inputRoomID, firebaseID);
-
+      await setSecondPlayer(inputRoomID, firebaseID);
+      await addToFirebaseToRoomMap(firebaseID,roomID);
       // sending host-color to caller
       socket.emit("recieve-host-color", hostColor);
 
@@ -82,7 +87,16 @@ io.on("connection", (socket) => {
     socket.broadcast.to(roomID).emit("recieve-updated-board", boardState);
   });
 
+
   // Todo: make event handler for reconnecting when the user clicks on the rejoin button from client side
+  
+  socket.on("rejoin-request",async ({firebaseID,prevRoomID,playerEmail})=>{
+    let isValidRequest =  redisRejoinHandler(firebaseID,prevRoomID)
+    if(isValidRequest){
+      let rejoinersColor = await getCurrentPlayerColor(prevRoomID,firebaseID);
+      console.log("rejoiner's color:",rejoinersColor)
+    }
+  })
 });
 
 server.listen(PORT, () => console.log(`server is up at ${PORT}`));
