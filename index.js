@@ -94,7 +94,7 @@ io.on("connection", (socket) => {
     let isValidRequest =  redisRejoinHandler(firebaseID,prevRoomID)
     if(isValidRequest){
       let rejoinersColor = await getCurrentPlayerColor(prevRoomID,firebaseID);
-      console.log("rejoiner's color:",color)
+      console.log("rejoiner's color:",rejoinersColor)
     }
   })
 });
