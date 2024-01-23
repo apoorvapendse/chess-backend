@@ -43,7 +43,7 @@ io.on("connection", (socket) => {
 
     // creating game in redis
     await createGameInRedis(newRoomID, firebaseID);
-    await addToFirebaseToRoomMap(firebaseID,newRoomID);
+    await addToFirebaseToRoomMap(firebaseID, newRoomID);
     console.log(playerEmail + " created room with id: " + newRoomID);
   });
 
@@ -69,34 +69,43 @@ io.on("connection", (socket) => {
 
       // adding second player to redis
       await setSecondPlayer(inputRoomID, firebaseID);
-      await addToFirebaseToRoomMap(firebaseID,roomID);
+      await addToFirebaseToRoomMap(firebaseID, roomID);
+
       // sending host-color to caller
       socket.emit("recieve-host-color", hostColor);
 
       // sending join-success to host
       io.to(roomID).emit("join-success");
     } else {
+      // TODO: handle this event on client side
       io.to(roomID).emit("host-piece-color-unselected");
     }
   });
 
   socket.on("update-board", ({ boardState, roomID }) => {
-    // saving boardstate to redis or db
+    // saving boardstate in GlobalHashMap
     updateBoardState(roomID, boardState);
 
+    // forward the boardState to other player
     socket.broadcast.to(roomID).emit("recieve-updated-board", boardState);
   });
 
-
   // Todo: make event handler for reconnecting when the user clicks on the rejoin button from client side
-  
-  socket.on("rejoin-request",async ({firebaseID,prevRoomID,playerEmail})=>{
-    let isValidRequest =  redisRejoinHandler(firebaseID,prevRoomID)
-    if(isValidRequest){
-      let rejoinersColor = await getCurrentPlayerColor(prevRoomID,firebaseID);
-      console.log("rejoiner's color:",rejoinersColor)
+
+  socket.on(
+    "rejoin-request",
+    async ({ firebaseID, prevRoomID, playerEmail }) => {
+      // redisRejoinHandler will verify if the rejoin request is valid
+      let isValidRequest = redisRejoinHandler(firebaseID, prevRoomID);
+      if (isValidRequest) {
+        let rejoinersColor = await getCurrentPlayerColor(
+          prevRoomID,
+          firebaseID
+        );
+        console.log("rejoiner's color:", rejoinersColor);
+      }
     }
-  })
+  );
 });
 
 server.listen(PORT, () => console.log(`server is up at ${PORT}`));
