@@ -8,14 +8,13 @@ import {
   setHostColor,
   setSecondPlayer,
   updateBoardState,
-} from "./redis/redisFuncs.js";
+} from "../redis/redisFuncs.js";
 
-
-export async function createGameHandler({
-  firebaseID,
-  newRoomID,
-  playerEmail,
-}) {
+export async function createGameHandler(
+  socket,
+  io,
+  { firebaseID, newRoomID, playerEmail }
+) {
   // join room and then let the creator socket know
   // about successful joining by emitting the id in the room;
   // rooms are created with host's roomID
@@ -28,7 +27,7 @@ export async function createGameHandler({
   console.log(playerEmail + " created room with id: " + newRoomID);
 }
 
-export async function getHostPieceColor({ hostPieceColor, roomID }) {
+export async function getHostPieceColor(socket, { hostPieceColor, roomID }) {
   // storing hostColor in redis
   console.log(
     "host set his piece color to:",
@@ -40,11 +39,11 @@ export async function getHostPieceColor({ hostPieceColor, roomID }) {
   console.log("recieve-host-color", hostPieceColor);
 }
 
-export async function joinGameHandler({
-  firebaseID,
-  playerEmail,
-  inputRoomID,
-}) {
+export async function joinGameHandler(
+  socket,
+  io,
+  { firebaseID, playerEmail, inputRoomID }
+) {
   let roomID = inputRoomID;
   const hostColor = await getHostColor(inputRoomID);
 
@@ -67,7 +66,7 @@ export async function joinGameHandler({
   }
 }
 
-export async function updateBoardHandler({ boardState, roomID }) {
+export async function updateBoardHandler(socket, { boardState, roomID }) {
   // saving boardstate in GlobalHashMap
   updateBoardState(roomID, boardState);
 
@@ -75,11 +74,10 @@ export async function updateBoardHandler({ boardState, roomID }) {
   socket.broadcast.to(roomID).emit("recieve-updated-board", boardState);
 }
 
-export async function rejoinRequestHandler({
-  firebaseID,
-  prevRoomID,
-  playerEmail,
-}) {
+export async function rejoinRequestHandler(
+  socket,
+  { firebaseID, prevRoomID, playerEmail }
+) {
   // redisRejoinHandler will verify if the rejoin request is valid
   let isValidRequest = redisRejoinHandler(firebaseID, prevRoomID);
   if (isValidRequest) {
