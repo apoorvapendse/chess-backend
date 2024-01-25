@@ -80,23 +80,26 @@ export async function rejoinRequestHandler(
   { firebaseID, prevRoomID, playerEmail }
 ) {
   // redisRejoinHandler will verify if the rejoin request is valid
+  // by querying FirebaseToRoomMap
   let isValidRequest = redisRejoinHandler(firebaseID, prevRoomID);
   if (isValidRequest) {
     let rejoinersColor = await getRejoinersColor(prevRoomID, firebaseID);
     // to go from / to /board
-    socket.join(prevRoomID)
-    socket.emit("rejoin-success",(rejoinersColor))
+    socket.join(prevRoomID);
+    socket.emit("rejoin-success", rejoinersColor);
 
-    //to set board state 
+    //to set board state
     let currBoardState = await getBoardState(prevRoomID);
-    let currentPlayerColor = await getCurrentPlayerColor(prevRoomID)
-   
-    console.log(currentPlayerColor)
+    let currentPlayerColor = await getCurrentPlayerColor(prevRoomID);
 
-    let isPlayersTurn = rejoinersColor===currentPlayerColor?true:false;
-    //now if playersTurn is true,meanns that boardState is according to his orientation, else we have to rotate 
-   let shouldFlip = isPlayersTurn
-    socket.emit("receive-rejoin-board",({currBoardState,isPlayersTurn,shouldFlip}))
+    console.log(currentPlayerColor);
 
+    let isPlayersTurn = rejoinersColor === currentPlayerColor ? true : false;
+    // now if playersTurn is true,means that boardState is according to
+    // his orientation, else we have to rotate
+    socket.emit("receive-rejoin-board", {
+      currBoardState,
+      isPlayersTurn,
+    });
   }
 }
