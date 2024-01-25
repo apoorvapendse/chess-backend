@@ -37,7 +37,7 @@ export async function getHostPieceColor(socket, { hostPieceColor, roomID }) {
     roomID
   );
   await setHostColor(roomID, hostPieceColor);
-  console.log("recieve-host-color", hostPieceColor);
+  console.log("receive-host-color", hostPieceColor);
 }
 
 export async function joinGameHandler(
@@ -57,7 +57,7 @@ export async function joinGameHandler(
     await addToFirebaseToRoomMap(firebaseID, roomID);
 
     // sending host-color to caller
-    socket.emit("recieve-host-color", hostColor);
+    socket.emit("receive-host-color", hostColor);
 
     // sending join-success to host
     io.to(roomID).emit("join-success");
@@ -72,7 +72,7 @@ export async function updateBoardHandler(socket, { boardState, roomID }) {
   updateBoardState(roomID, boardState);
 
   // forward the boardState to other player
-  socket.broadcast.to(roomID).emit("recieve-updated-board", boardState);
+  socket.broadcast.to(roomID).emit("receive-updated-board", boardState);
 }
 
 export async function rejoinRequestHandler(
