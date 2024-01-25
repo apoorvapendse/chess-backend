@@ -2,12 +2,13 @@ import {
   addToFirebaseToRoomMap,
   createGameInRedis,
   getBoardState,
-  getCurrentPlayerColor,
+  getRejoinersColor,
   getHostColor,
   redisRejoinHandler,
   setHostColor,
   setSecondPlayer,
   updateBoardState,
+  getCurrentPlayerColor,
 } from "../redis/redisFuncs.js";
 
 export async function createGameHandler(
@@ -81,7 +82,20 @@ export async function rejoinRequestHandler(
   // redisRejoinHandler will verify if the rejoin request is valid
   let isValidRequest = redisRejoinHandler(firebaseID, prevRoomID);
   if (isValidRequest) {
-    let rejoinersColor = await getCurrentPlayerColor(prevRoomID, firebaseID);
-    console.log("rejoiner's color:", rejoinersColor);
+    let rejoinersColor = await getRejoinersColor(prevRoomID, firebaseID);
+    // to go from / to /board
+    socket.emit("rejoin-success",(rejoinersColor))
+
+    //to set board state 
+    let currBoardState = await getBoardState(prevRoomID);
+    let currentPlayerColor = await getCurrentPlayerColor(prevRoomID)
+    console.log(currBoardState)
+    console.log(currentPlayerColor)
+
+    let isPlayersTurn = rejoinersColor!==currentPlayerColor?true:false;
+    //now if playersTurn is true,meanns that boardState is according to his orientation, else we have to rotate 
+   let shouldFlip = !isPlayersTurn
+    socket.emit("receive-rejoin-board",({currBoardState,isPlayersTurn,shouldFlip}))
+
   }
 }

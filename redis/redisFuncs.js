@@ -50,6 +50,16 @@ export async function setCurrentPlayerColor(currentPlayerColor) {
   );
 }
 
+export async function getCurrentPlayerColor(roomID) {
+ let color =  await redis.hget(
+    `GlobalHashMap:${roomID}`,
+    `currentPlayerColor`,
+  );
+
+  return color;
+}
+
+
 export async function updateBoardState(innerHashID, boardState) {
   try {
     // flipping the currentPlayerColor
@@ -98,7 +108,7 @@ export async function redisRejoinHandler(firebaseID, prevRoomID) {
 // queries GlobalHashMap for both player's firebaseIDs
 // if rejoiner is host return hostColor
 // else return opposite color of hostColor
-export async function getCurrentPlayerColor(roomID, rejoinersFirebaseID) {
+export async function getRejoinersColor(roomID, rejoinersFirebaseID) {
   console.log("roomid:", roomID);
   let player1FirebaseID = await redis.hget(
     `GlobalHashMap:${roomID}`,
