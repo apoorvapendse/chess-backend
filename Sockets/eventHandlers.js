@@ -84,6 +84,7 @@ export async function rejoinRequestHandler(
   if (isValidRequest) {
     let rejoinersColor = await getRejoinersColor(prevRoomID, firebaseID);
     // to go from / to /board
+    socket.join(prevRoomID)
     socket.emit("rejoin-success",(rejoinersColor))
 
     //to set board state 
@@ -93,8 +94,7 @@ export async function rejoinRequestHandler(
     console.log(currentPlayerColor)
 
     let isPlayersTurn = rejoinersColor===currentPlayerColor?true:false;
-    //now if playersTurn is true,meanns that boardState is not according to his orientation but according to previously played players orientation
-    //so we will flip the board if playersTurn is true
+    //now if playersTurn is true,meanns that boardState is according to his orientation, else we have to rotate 
    let shouldFlip = isPlayersTurn
     socket.emit("receive-rejoin-board",({currBoardState,isPlayersTurn,shouldFlip}))
 
