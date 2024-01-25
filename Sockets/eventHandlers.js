@@ -89,12 +89,13 @@ export async function rejoinRequestHandler(
     //to set board state 
     let currBoardState = await getBoardState(prevRoomID);
     let currentPlayerColor = await getCurrentPlayerColor(prevRoomID)
-    console.log(currBoardState)
+   
     console.log(currentPlayerColor)
 
-    let isPlayersTurn = rejoinersColor!==currentPlayerColor?true:false;
-    //now if playersTurn is true,meanns that boardState is according to his orientation, else we have to rotate 
-   let shouldFlip = !isPlayersTurn
+    let isPlayersTurn = rejoinersColor===currentPlayerColor?true:false;
+    //now if playersTurn is true,meanns that boardState is not according to his orientation but according to previously played players orientation
+    //so we will flip the board if playersTurn is true
+   let shouldFlip = isPlayersTurn
     socket.emit("receive-rejoin-board",({currBoardState,isPlayersTurn,shouldFlip}))
 
   }
