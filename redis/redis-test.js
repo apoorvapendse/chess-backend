@@ -7,7 +7,7 @@ export async function addToFirebaseToRoomMap(firebaseID, roomID) {
   console.log('added to redis');
 }
 
-await createGameInRedis('hostid', 'mail');
+
 await addToFirebaseToRoomMap('firebaseiddd', 'blyaad')
 
 export async function createGameInRedis(hostUid, hostEmail) {
