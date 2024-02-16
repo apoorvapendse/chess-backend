@@ -17,7 +17,7 @@ const app = express();
 const server = createServer(app);
 
 //io will handle all the socket connections
-const io = new Server(server, { cors: { origin: "http://localhost:3000" } });
+const io = new Server(server, { cors: { origin: "https://aprt-chess-frontend.onrender.com/" } });
 
 const PORT = 4000;
 
