@@ -4,22 +4,19 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import socketEvents from "./Sockets/socket.js";
 
-// Block for some notes, collapse if not needed
-{
-  // in normal client-server http requests,
-  // server can only communicate with client iff client sends some request to the server
-  //web socket connection doesn't close like http and communication is bidirectional(full duplex)
-}
-
 const app = express();
-
-// server will handle all the http requests
 const server = createServer(app);
-
-//io will handle all the socket connections
-const io = new Server(server, { cors: { origin: "https://aprt-chess-frontend.onrender.com/" } });
+const io = new Server(server, { cors: { origin: "https://aprt-chess-frontend.onrender.com", methods: ["GET", "POST"] } }); // Add methods if needed
 
 const PORT = 4000;
+
+// Set up CORS headers for all routes
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://aprt-chess-frontend.onrender.com");
+  res.header("Access-Control-Allow-Methods", "GET, POST"); // Add methods if needed
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 app.use("/", router);
 
