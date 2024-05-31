@@ -1,9 +1,11 @@
 import Redis from "ioredis";
+import dotenv from "dotenv"
+dotenv.config()
 
 const redis = new Redis({
-  host: "13.201.118.242",
-  password: "fuSFKAyGuNSdgUwClbuxX9CQm7XrXzgN",
-  port: 16637,
+  host: process.env.REDIS_HOST,
+  password: process.env.REDIS_PASS,
+  port: process.env.REDIS_PORT, 
 });
 
 redis.on("error", (err) => {
