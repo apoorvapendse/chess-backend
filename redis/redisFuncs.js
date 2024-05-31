@@ -1,11 +1,14 @@
 import Redis from "ioredis";
 
 const redis = new Redis({
-  port: 17156,
-  host: 'redis-17156.c321.us-east-1-2.ec2.cloud.redislabs.com',
-  password: 'sO3b4FzLLPQHHSj8LzVynYg4ECA0tb2C'
+  host: "13.201.118.242",
+  password: "fuSFKAyGuNSdgUwClbuxX9CQm7XrXzgN",
+  port: 16637,
 });
 
+redis.on("error", (err) => {
+  console.log(err);
+});
 // creats a game in GlobalHashMap with host's mail
 export async function createGameInRedis(hostUid, hostEmail) {
   // TODO: set expiry time for created game
@@ -55,14 +58,10 @@ export async function setCurrentPlayerColor(currentPlayerColor) {
 }
 
 export async function getCurrentPlayerColor(roomID) {
- let color =  await redis.hget(
-    `GlobalHashMap:${roomID}`,
-    `currentPlayerColor`,
-  );
+  let color = await redis.hget(`GlobalHashMap:${roomID}`, `currentPlayerColor`);
 
   return color;
 }
-
 
 export async function updateBoardState(innerHashID, boardState) {
   try {
