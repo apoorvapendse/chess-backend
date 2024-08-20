@@ -1,9 +1,10 @@
 import Redis from "ioredis";
-
+import dotnev from 'dotenv'
+dotnev.config();
 const redis = new Redis({
-  port: 17156,
-  host: 'redis-17156.c321.us-east-1-2.ec2.cloud.redislabs.com',
-  password: 'sO3b4FzLLPQHHSj8LzVynYg4ECA0tb2C'
+  port: process.env.REDIS_PORT,
+  host: process.env.REDIS_HOST,
+  password: process.env.REDIS_PASS
 });
 
 // creats a game in GlobalHashMap with host's mail
